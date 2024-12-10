@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white shadow-md rounded-lg w-full max-w-2xl flex flex-col h-[80vh]">
+        <!-- Chat Header -->
+        <div class="bg-blue-500 text-white px-4 py-3 rounded-t-lg">
+            <h2 class="text-lg font-semibold">Chat Room: {{ room.name }}</h2>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chat-window" class="flex-1 overflow-y-auto p-4 bg-gray-50">
+            {% for message in message %}
+                {% if message.user == username %}
+                <!-- Current User Message -->
+                <div class="mb-4 flex justify-end">
+                    <div class="flex flex-col items-end">
+                        <p class="text-sm text-gray-500">{{ message.date }}</p>
+                        <p class="text-sm font-semibold text-green-600">{{ message.user }}</p>
+                        <p class="text-base bg-blue-200 p-2 rounded-lg inline-block mt-1">{{ message.value }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <!-- Other User Message -->
+                <div class="mb-4 flex justify-start">
+                    <div class="flex flex-col items-start">
+                        <p class="text-sm text-gray-500">{{ message.date }}</p>
+                        <p class="text-sm font-semibold text-purple-600">{{ message.user }}</p>
+                        <p class="text-base bg-gray-200 p-2 rounded-lg inline-block mt-1">{{ message.value }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Message Input -->
+        <form id="post-form" class="flex items-center border-t border-gray-200 p-4">
+            <input type="hidden" name="user" id="user" value="{{ username }}">
+            <input type="hidden" name="room" id="room" value="{{ room.name }}">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <input type="text" id="message" placeholder="Type your message..." name="message" required
+                   class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300">
+            <button type="submit"
+                    class="ml-3 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">
+                Send
+            </button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+        $(document).on('submit', '#post-form', function(e) {
+            e.preventDefault();
+    
+            $.ajax({
+                type: 'POST',
+                url: '/send',
+                data: {
+                    username: $('#user').val(),
+                    room: $('#room').val(),
+                    message: $('#message').val(),
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(data) {
+                    alert(data); // Display a success alert
+                }
+            });
+    
+            document.getElementById('message').value = ''; // Clear the input field
+        });
+    </script>
+    
+</body>
+</html>
