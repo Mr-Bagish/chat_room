@@ -3,13 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join Chat Room</title>
+    <title>Create a Chat Room</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gradient-to-br from-green-300 via-blue-500 to-purple-600 min-h-screen flex items-center justify-center p-6">
     <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-8">
-        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Join a Chat Room</h2>
-        <form action="{% url "room_validate" %}" method="POST" class="space-y-4">
+        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Create a Chat Room</h2>
+        {% for message in messages %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline">{{ message }}</span>
+            <!-- Close Button -->
+            <button 
+                class="absolute top-2 right-2 text-red-700 hover:text-red-900 focus:outline-none"
+                onclick="this.parentElement.style.display='none';"
+            >
+                &times;
+            </button>
+        </div>
+        {% endfor %}
+        <form action="{% url "create_room" %}" method="POST" class="space-y-4">
             {% csrf_token %}
             <!-- Room Name -->
             <div>
@@ -40,7 +52,7 @@
                 type="submit" 
                 class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-2 px-4 rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
-                Join Room
+                Create Room
             </button>
         </form>
     </div>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Room</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center h-screen">
     <div class="bg-white shadow-md rounded-lg w-full max-w-2xl flex flex-col h-[80vh]">
@@ -15,27 +16,6 @@
 
         <!-- Chat Messages -->
         <div id="chat-window" class="flex-1 overflow-y-auto p-4 bg-gray-50">
-            {% for message in message %}
-                {% if message.user == username %}
-                <!-- Current User Message -->
-                <div class="mb-4 flex justify-end">
-                    <div class="flex flex-col items-end">
-                        <p class="text-sm text-gray-500">{{ message.date }}</p>
-                        <p class="text-sm font-semibold text-green-600">{{ message.user }}</p>
-                        <p class="text-base bg-blue-200 p-2 rounded-lg inline-block mt-1">{{ message.value }}</p>
-                    </div>
-                </div>
-                {% else %}
-                <!-- Other User Message -->
-                <div class="mb-4 flex justify-start">
-                    <div class="flex flex-col items-start">
-                        <p class="text-sm text-gray-500">{{ message.date }}</p>
-                        <p class="text-sm font-semibold text-purple-600">{{ message.user }}</p>
-                        <p class="text-base bg-gray-200 p-2 rounded-lg inline-block mt-1">{{ message.value }}</p>
-                    </div>
-                </div>
-                {% endif %}
-            {% endfor %}
         </div>
 
         <!-- Message Input -->
@@ -52,8 +32,35 @@
         </form>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="text/javascript">
+        // Fetch messages every 1 second
+        $(document).ready(function() {
+            setInterval(function() {
+                $.ajax({
+                    type: 'GET',
+                    url: '/getMessages/{{ room.name }}/',
+                    success: function(response) {
+                        $("#chat-window").empty(); // Clear chat window
+                        response.forEach(function(message) {
+                            var msgHtml = `
+                                <div class="${message.user === '{{ username }}' ? 'flex justify-end mb-4' : 'flex justify-start mb-4'}">
+                                    <div class="flex flex-col ${message.user === '{{ username }}' ? 'items-end' : 'items-start'}">
+                                        <p class="text-sm text-gray-500">${message.date}</p>
+                                        <p class="text-sm font-semibold ${message.user === '{{ username }}' ? 'text-green-600' : 'text-purple-600'}">${message.user}</p>
+                                        <p class="text-base ${message.user === '{{ username }}' ? 'bg-blue-200' : 'bg-gray-200'} p-2 rounded-lg inline-block mt-1">${message.value}</p>
+                                    </div>
+                                </div>`;
+                            $("#chat-window").append(msgHtml);
+                        });
+                    },
+                    error: function() {
+                        alert("Error fetching messages");
+                    }
+                });
+            }, 1000); // Refresh every 1 second
+        });
+
+        // Send new message
         $(document).on('submit', '#post-form', function(e) {
             e.preventDefault();
     
@@ -74,6 +81,5 @@
             document.getElementById('message').value = ''; // Clear the input field
         });
     </script>
-    
 </body>
 </html>
